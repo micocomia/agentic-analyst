@@ -1,0 +1,13 @@
+Excel1.xlsx:
+This file contains sales data.
+Column1 - Explanation for column 1
+Column2 - Explanation for column 2
+Another line of instruction.
+
+TextFile1.txt:
+Instructions specific to TextFile1.
+
+Excel2.xlsx:
+General explanation.
+Column1 - Some detail about column 1
+Column3 - Some detail about column 3

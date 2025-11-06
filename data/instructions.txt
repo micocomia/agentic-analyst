@@ -1,13 +1,24 @@
-Excel1.xlsx:
-This file contains sales data.
-Column1 - Explanation for column 1
-Column2 - Explanation for column 2
-Another line of instruction.
+Data Dictionary.xlsx #query:
+Purpose, Contains database specific information required for constructing or verifying SQL queries related to indicators.
+Usage, Use for query related questions, such as retrieving column names, table names, and filters to construct queries (e.g., SELECT, FROM, WHERE).
+Priority, Use this file for accurate query construction and for cross referencing details using unique indicator IDs or descriptive names.
+Indicator ID - Unique identifier for each indicator (used to refer to the indicator). 
+Indicator - Descriptive name of the indicator (often matches sections or outputs). You may use this information to clarify with the user what specific indicator they are referring to. E.g., total filings may refer to trademark filings, total filings, or trademark filings by country in which case, clarify with the user first before creating the query.
+Description - A short explanation of the indicator. You may use this information in conjuction with "Indicator" to clarify with the user what specific indicator they are referring to.
+Column Name - Use this for the generated query's SELECT clause.
+Table Name - Use this for the generated query's FROM clause.
+Partitions - Columns used for aggregating data (includes "Status" for stable data and "agg_date" for the aggregation date). Consider this column when slicing the data within a table.
+Aggregation - Granularity information which should be considered for generating queries. E.g., tables tagged daily would per day aggregations (e.g., "agg_date = '2025-01-01'), whereas tables tagged yearly would have by year aggregations (e.g., "agg_date = 2025")
+Filter - Use this for the generated query's WHERE clause (ignore if "N/A").
+Notes - Additional information to clarify query results or aid data interpretation.
+Function Name - The function that generates the indicator’s data.
+Parameters - Parameters that the function accepts.
+Function Indicator Number - Column number within the function output corresponding to the indicator.
+Stored Procedure Name - The stored procedure that runs the function on a schedule.
+Stability Window - The period during which indicat or data is considered unstable.
+Schedule - The scheduled frequency for the stored procedure.
 
-TextFile1.txt:
-Instructions specific to TextFile1.
-
-Excel2.xlsx:
-General explanation.
-Column1 - Some detail about column 1
-Column3 - Some detail about column 3
+CIPO Reference Guide.pdf #definition:
+Purpose, Provides definitions and detailed information for various indicators used by the Canadian Intellectual Property Office (CIPO).
+Usage, DO NOT USE THIS FOR CREATING QUERIES. Use the "Overview" sections in each chapter for general indicator definitions. Refer to the specific indicator sections for details on SQL Queries, Query Notes, Sensitivity to Query Timing, and Optimal Query Timing.
+Priority, Use this file when detailed information about indicator definitions and underlying query logic is needed.

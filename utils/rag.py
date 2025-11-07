@@ -80,7 +80,8 @@ def load_documents(folder_path: str = "data") -> List[Document]:
         print(f'Processing {file}')
         filename = file.name
         
-        if "instructions" in filename:
+        if "instructions" in file.name.lower():
+            print(f'Skipped {file.name.lower()}')
             continue
             
         base_name = filename.split("#")[0].strip()
@@ -124,43 +125,46 @@ def load_documents(folder_path: str = "data") -> List[Document]:
             try:
                 excel_data = pd.ExcelFile(file)
                 for sheet_name in excel_data.sheet_names:
-                    df = pd.read_excel(file, sheet_name=sheet_name)
-
-                    available_cols = [c for c in columns_to_extract if c in df.columns]
-                    print(columns_to_extract)
+                    # Read sheet as strings and don't drop empty columns
+                    df = pd.read_excel(file, sheet_name=sheet_name, dtype=str, engine="openpyxl")
                     
+                    # Normalize column names: strip whitespace and control chars
+                    df.columns = [str(c).strip() for c in df.columns]
+
+                    # Also normalize the columns_to_extract names (strip)
+                    normalized_required = [c.strip() for c in columns_to_extract]
+
+                    # Determine which required columns are available after normalization
+                    available_cols = [c for c in normalized_required if c in df.columns]
+
                     if not available_cols:
                         print('No available columns')
                         continue
                     else:
                         print(f'Available cols: {available_cols}')
 
-                    df = df[available_cols]
+                    # Replace missing values with a placeholder so columns don't disappear for a row
+                    df = df[available_cols].fillna("N/A")
 
-                    # Process each row independently
-                    for idx, row in df.iterrows():
-                        row_text = ", ".join(
-                            f"{col}: {row[col]}" for col in available_cols if not pd.isna(row[col])
-                        )
-                        if not row_text:
+                    text_lines = []
+                    for _, row in df.iterrows():
+                        # Preserve column order and always include the column name — show "N/A" when missing.
+                        row_text = ", ".join(f"{col}: {row.get(col, 'N/A')}" for col in available_cols)
+                        # skip completely empty rows (all N/A)
+                        if all((str(row.get(col, "")).strip() in ("", "N/A") for col in available_cols)):
                             continue
+                        text_lines.append(row_text)
 
-                        # Split large rows into smaller chunks (if needed)
-                        for chunk_num, chunk in enumerate(splitter.split_text(row_text)):
-                            docs.append(Document(
-                                page_content=chunk,
-                                metadata={
-                                    "source": f"{file}:{sheet_name}",
-                                    "row_index": int(idx),
-                                    "chunk_index": chunk_num,
-                                    "instructions": instructions,
-                                    "tag": tag
-                                }
-                            ))
-
+                    # Only create docs if there is text
+                    if text_lines:
+                        for chunk in splitter.split_text("\n".join(text_lines)):
+                            docs.append(Document(page_content=chunk, metadata={
+                                "source": f"{file}:{sheet_name}",
+                                "instructions": instructions,
+                                "tag": tag
+                            }))
             except Exception as e:
                 print(f"Warning: Could not process Excel file {file}: {e}")
-
 
     return docs
 
